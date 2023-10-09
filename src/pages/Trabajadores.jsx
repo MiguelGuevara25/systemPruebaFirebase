@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "react-modal";
 import TableTrabajadores from "../components/TableTrabajadores";
+import { uploadFile } from "../firebase/config";
 
 const customStyles = {
   content: {
@@ -15,18 +16,34 @@ const customStyles = {
 
 const Trabajadores = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [file, setFile] = useState(null);
+  const [result, setResult] = useState(null);
 
-  function openModal() {
+  const openModal = () => {
     setIsOpen(true);
-  }
+  };
 
-  function closeModal() {
+  const closeModal = () => {
     setIsOpen(false);
-  }
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await uploadFile(file);
+      setResult(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <>
       <TableTrabajadores />
+
+      <div>
+        <img src={result} alt="" />
+      </div>
 
       <button onClick={openModal}>Open Modal</button>
       <Modal
@@ -34,17 +51,18 @@ const Trabajadores = () => {
         onRequestClose={closeModal}
         style={customStyles}
       >
-        <form>
+        <form onSubmit={handleUpload}>
           <input
             type="file"
             name="trabajadorPhoto"
             accept=".png, .jpg, .jpeg"
             onChange={(e) => {
-              console.log(e.target.files[0]);
+              setFile(e.target.files[0]);
             }}
           />
+          <input type="submit" value="Upload" />
         </form>
-        <button onClick={closeModal}>close</button>
+        <input type="button" value="Close" onClick={closeModal} />
       </Modal>
     </>
   );
